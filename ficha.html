@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Ficha</title>
+<link rel="stylesheet" href="style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+
+<h1>Ficha</h1>
+
+<div class="foto-container">
+    <img id="fotoJogador" class="foto">
+</div>
+
+<button onclick="alterarFoto()">Alterar Foto</button>
+
+<div class="section">
+Nome: <input id="nome"><br><br>
+
+Físico: <input id="fisico" type="number"><br>
+Mental: <input id="mental" type="number"><br>
+Personalidade: <input id="personalidade" type="number"><br>
+</div>
+
+<div class="section">
+<h3>Dano</h3>
+Carga atual: <span id="danoAtual">0</span> /
+<span id="limite"></span><br>
+
+<button onclick="addDano(1)">Leve</button>
+<button onclick="addDano(2)">Moderado</button>
+<button onclick="addDano(3)">Grave</button>
+<button onclick="zerarDano()">Curar</button>
+</div>
+
+<div class="section">
+<h3>Fôlego</h3>
+<span id="folegoTxt"></span>
+
+<div class="bar">
+<div class="fill" id="folegoBar"></div>
+</div>
+
+<button onclick="gastarFolego(1)">-1</button>
+<button onclick="gastarFolego(2)">-2</button>
+<button onclick="recuperarFolego()">Recuperar</button>
+</div>
+
+<div class="section">
+<h3>Inventário</h3>
+
+<select id="peso">
+<option value="1">Leve</option>
+<option value="2">Comum</option>
+<option value="3">Pesado</option>
+<option value="4">Muito Pesado</option>
+</select>
+
+<input id="itemNome" placeholder="Item">
+<button onclick="addItem()">Adicionar</button>
+
+<ul id="inventario"></ul>
+Slots: <span id="slotsUsados"></span> /
+<span id="slotsTotal"></span>
+</div>
+
+<div class="section">
+<h3>Rolagem</h3>
+
+<select id="atributo">
+<option value="fisico">Físico</option>
+<option value="mental">Mental</option>
+<option value="personalidade">Personalidade</option>
+</select>
+
+<input id="bonus" type="number" placeholder="Bônus">
+
+<button onclick="rolar()">Rolar</button>
+
+<h3 id="resultado"></h3>
+</div>
+
+<script>
+const jogadores = JSON.parse(localStorage.getItem("jogadores"))
+const atual = localStorage.getItem("jogadorAtual")
+const j = jogadores[atual]
+
+if(!j.inventario) j.inventario=[]
+if(!j.dano) j.dano=0
+if(!j.folegoAtual) j.folegoAtual=5
+
+nome.value = j.nome
+fisico.value = j.fisico
+mental.value = j.mental
+personalidade.value = j.personalidade
+
+function carregarFoto(){
+    const img = document.getElementById("fotoJogador")
+
+    if(j.foto){
+        img.src = j.foto
+    }else{
+        img.style.display = "none"
+    }
+}
+
+function alterarFoto(){
+    const nova = prompt("Cole a nova URL da imagem:")
+    if(!nova) return
+
+    j.foto = nova
+    salvar()
+    carregarFoto()
+}
+
+function salvar(){
+localStorage.setItem("jogadores", JSON.stringify(jogadores))
+}
+
+function atualizar(){
+
+j.nome = nome.value
+j.fisico = Number(fisico.value)
+j.mental = Number(mental.value)
+j.personalidade = Number(personalidade.value)
+
+const limite = 6 + j.fisico
+const folegoMax = 5 + j.fisico
+const slotsMax = 5 + j.fisico
+
+document.getElementById("limite").innerText = limite
+document.getElementById("danoAtual").innerText = j.dano
+
+document.getElementById("folegoTxt").innerText =
+j.folegoAtual + " / " + folegoMax
+
+document.getElementById("folegoBar").style.width =
+(j.folegoAtual/folegoMax*100)+"%"
+
+document.getElementById("slotsTotal").innerText = slotsMax
+
+renderInventario()
+
+salvar()
+}
+
+function addDano(v){
+j.dano += v
+atualizar()
+}
+
+function zerarDano(){
+j.dano = 0
+atualizar()
+}
+
+function gastarFolego(v){
+j.folegoAtual -= v
+if(j.folegoAtual < 0) j.folegoAtual = 0
+atualizar()
+}
+
+function recuperarFolego(){
+j.folegoAtual = 5 + j.fisico
+atualizar()
+}
+
+function addItem(){
+const nome = itemNome.value
+const peso = Number(document.getElementById("peso").value)
+
+j.inventario.push({nome,peso})
+
+itemNome.value=""
+atualizar()
+}
+
+function renderInventario(){
+const ul = document.getElementById("inventario")
+ul.innerHTML=""
+
+let total=0
+
+j.inventario.forEach((item,i)=>{
+total += item.peso
+ul.innerHTML +=
+`<li>${item.nome} (${item.peso})
+<button onclick="removerItem(${i})">X</button></li>`
+})
+
+document.getElementById("slotsUsados").innerText = total
+}
+
+function removerItem(i){
+j.inventario.splice(i,1)
+atualizar()
+}
+
+function rolar(){
+const attr = atributo.value
+const bonusVal = Number(bonus.value) || 0
+const d20 = Math.floor(Math.random()*20)+1
+
+const total = d20 + j[attr] + bonusVal
+
+resultado.innerText =
+`d20(${d20}) + ${j[attr]} + ${bonusVal} = ${total}`
+}
+
+document.querySelectorAll("input").forEach(i=>{
+i.addEventListener("input", atualizar)
+})
+
+carregarFoto()
+atualizar()
+</script>
+
+</body>
+</html>
