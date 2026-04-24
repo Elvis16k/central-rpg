@@ -54,7 +54,7 @@ window.location.href="ficha.html"
 
 if(window.location.pathname.includes("ficha.html")){
 const jogadores = JSON.parse(localStorage.getItem("jogadores") || "[]")
-const atual = localStorage.getItem("jogadorAtual")
+const atual = Number(localStorage.getItem("jogadorAtual"))
 const j = jogadores[atual]
 
 if(j){
@@ -89,28 +89,60 @@ salvar()
 carregarFoto()
 }
 
+window.voltar = ()=>{
+window.location.href = "index.html"
+}
+
+window.excluirFicha = ()=>{
+const confirmar = confirm("Tem certeza que deseja excluir essa ficha?")
+if(!confirmar) return
+
+jogadores.splice(atual,1)
+localStorage.setItem("jogadores", JSON.stringify(jogadores))
+
+window.location.href="index.html"
+}
+
 function atualizar(){
+
 j.nome = nome.value
-j.fisico = Number(fisico.value)
-j.mental = Number(mental.value)
-j.personalidade = Number(personalidade.value)
+j.fisico = Number(fisico.value) || 0
+j.mental = Number(mental.value) || 0
+j.personalidade = Number(personalidade.value) || 0
 
 const limite = 6 + j.fisico
 const folegoMax = 5 + j.fisico
 const slotsMax = 5 + j.fisico
 
+if(j.dano > limite) j.dano = limite
+if(j.folegoAtual > folegoMax) j.folegoAtual = folegoMax
+
 document.getElementById("limite").innerText = limite
 document.getElementById("danoAtual").innerText = j.dano
-document.getElementById("folegoTxt").innerText = j.folegoAtual + " / " + folegoMax
-document.getElementById("folegoBar").style.width = (j.folegoAtual/folegoMax*100)+"%"
+
+document.getElementById("folegoTxt").innerText =
+j.folegoAtual + " / " + folegoMax
+
+document.getElementById("folegoBar").style.width =
+(j.folegoAtual/folegoMax*100)+"%"
+
 document.getElementById("slotsTotal").innerText = slotsMax
 
 renderInventario()
 salvar()
 }
 
-window.addDano = v => { j.dano+=v; atualizar() }
-window.zerarDano = ()=>{ j.dano=0; atualizar() }
+window.addDano = v=>{
+const limite = 6 + j.fisico
+j.dano += v
+if(j.dano > limite) j.dano = limite
+atualizar()
+}
+
+window.zerarDano = ()=>{
+j.dano=0
+atualizar()
+}
 
 window.gastarFolego = v=>{
 j.folegoAtual -= v
@@ -119,13 +151,26 @@ atualizar()
 }
 
 window.recuperarFolego = ()=>{
-j.folegoAtual = 5 + j.fisico
+const max = 5 + j.fisico
+j.folegoAtual += 2
+if(j.folegoAtual > max) j.folegoAtual = max
 atualizar()
 }
 
 window.addItem = ()=>{
 const nomeItem = itemNome.value
 const peso = Number(document.getElementById("peso").value)
+
+const limite = 5 + j.fisico
+
+let totalAtual = 0
+j.inventario.forEach(item => totalAtual += item.peso)
+
+if(totalAtual + peso > limite){
+alert("Limite de carga excedido!")
+return
+}
+
 j.inventario.push({nome:nomeItem,peso})
 itemNome.value=""
 atualizar()
@@ -152,12 +197,7 @@ j.inventario.splice(i,1)
 atualizar()
 }
 
-document.querySelectorAll("input").forEach(i=>{
-i.addEventListener("input", atualizar)
-})
-
 carregarFoto()
 atualizar()
-
 }
 }
