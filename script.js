@@ -52,10 +52,40 @@ localStorage.setItem("jogadorAtual",i)
 window.location.href="ficha.html"
 }
 
-if(window.location.pathname.includes("ficha.html")){
+// BOTÕES GLOBAIS (CORREÇÃO PRINCIPAL)
+window.voltar = ()=>{
+window.location.href = "index.html"
+}
+
+window.excluirFicha = ()=>{
+const jogadores = JSON.parse(localStorage.getItem("jogadores") || "[]")
+const atual = Number(localStorage.getItem("jogadorAtual"))
+
+if(isNaN(atual) || !jogadores[atual]){
+alert("Ficha inválida.")
+return
+}
+
+const confirmar = confirm("Tem certeza que deseja excluir essa ficha?")
+if(!confirmar) return
+
+jogadores.splice(atual,1)
+localStorage.setItem("jogadores", JSON.stringify(jogadores))
+
+window.location.href = "index.html"
+}
+
+// DETECTA PÁGINA DA FICHA (MAIS SEGURO)
+if(window.location.href.includes("ficha.html")){
+
 const jogadores = JSON.parse(localStorage.getItem("jogadores") || "[]")
 const atual = Number(localStorage.getItem("jogadorAtual"))
 const j = jogadores[atual]
+
+// PROTEÇÃO
+if(isNaN(atual) || !j){
+window.location.href = "index.html"
+}
 
 if(j){
 
@@ -89,20 +119,6 @@ salvar()
 carregarFoto()
 }
 
-window.voltar = ()=>{
-window.location.href = "index.html"
-}
-
-window.excluirFicha = ()=>{
-const confirmar = confirm("Tem certeza que deseja excluir essa ficha?")
-if(!confirmar) return
-
-jogadores.splice(atual,1)
-localStorage.setItem("jogadores", JSON.stringify(jogadores))
-
-window.location.href="index.html"
-}
-
 function atualizar(){
 
 j.nome = nome.value
@@ -117,16 +133,16 @@ const slotsMax = 5 + j.fisico
 if(j.dano > limite) j.dano = limite
 if(j.folegoAtual > folegoMax) j.folegoAtual = folegoMax
 
-document.getElementById("limite").innerText = limite
-document.getElementById("danoAtual").innerText = j.dano
+document.getElementById("limite").textContent = limite
+document.getElementById("danoAtual").textContent = j.dano
 
-document.getElementById("folegoTxt").innerText =
+document.getElementById("folegoTxt").textContent =
 j.folegoAtual + " / " + folegoMax
 
 document.getElementById("folegoBar").style.width =
 (j.folegoAtual/folegoMax*100)+"%"
 
-document.getElementById("slotsTotal").innerText = slotsMax
+document.getElementById("slotsTotal").textContent = slotsMax
 
 renderInventario()
 salvar()
@@ -189,13 +205,17 @@ ul.innerHTML += `
 </li>`
 })
 
-document.getElementById("slotsUsados").innerText = total
+document.getElementById("slotsUsados").textContent = total
 }
 
 window.removerItem = i=>{
 j.inventario.splice(i,1)
 atualizar()
 }
+
+document.querySelectorAll("input, select").forEach(i=>{
+i.addEventListener("input", atualizar)
+})
 
 carregarFoto()
 atualizar()
