@@ -11,6 +11,11 @@
 
 <h1>Ficha</h1>
 
+<div class="top-bar">
+<button onclick="voltar()">← Voltar</button>
+<button onclick="excluirFicha()" style="background:#dc2626;">Excluir</button>
+</div>
+
 <div class="foto-container">
 <img id="fotoJogador" class="foto">
 </div>
@@ -19,11 +24,27 @@
 
 <div class="section">
 Nome: <input id="nome"><br><br>
-
-Físico: <input id="fisico" type="number"><br>
-Mental: <input id="mental" type="number"><br>
-Personalidade: <input id="personalidade" type="number"><br>
 </div>
+
+<div class="atributos-grid">
+
+<div class="atributo-box">
+<span>FÍSICO</span>
+<input id="fisico" type="number">
+</div>
+
+<div class="atributo-box">
+<span>MENTAL</span>
+<input id="mental" type="number">
+</div>
+
+<div class="atributo-box">
+<span>PERSONALIDADE</span>
+<input id="personalidade" type="number">
+</div>
+
+</div>
+
 
 <div class="section">
 <h3>Dano</h3>
