@@ -1,296 +1,366 @@
-function carregar(){
-
-const jogadores = JSON.parse(localStorage.getItem("jogadores") || "[]")
-const lista = document.getElementById("lista")
-if(!lista) return
-
-lista.innerHTML=""
-
-jogadores.forEach((j,i)=>{
-const div=document.createElement("div")
-div.className="card"
-
-div.innerHTML=`
-<div class="foto-container">
-${j.foto 
-? `<img src="${j.foto}" class="foto">`
-: `<div class="foto-placeholder">👤</div>`}
-</div>
-
-<strong>${j.nome}</strong>
-<br><br>
-<button onclick="abrirFicha(${i})">Abrir</button>
-`
-lista.appendChild(div)
-})
+:root{
+--bg:#1E1C2F;
+--card:#2D1E36;
+--primary:#3E0866;
+--primary-light:#501A5E;
+--accent:#a855f7;
+--text:#e5e7eb;
+--muted:#a78bfa;
+--border:rgba(255,255,255,0.06);
 }
 
-function novoJogador(){
-
-const nome=prompt("Nome do jogador:")
-if(!nome) return
-
-const foto=prompt("URL da foto (opcional):")
-
-const jogadores=JSON.parse(localStorage.getItem("jogadores")||"[]")
-
-jogadores.push({
-nome,
-foto:foto||"",
-
-idade:"",
-genero:"",
-especializacao:"",
-descricao:"",
-
-fisico:0,
-mental:0,
-personalidade:0,
-
-pericias:[],
-
-habEspecial:"",
-outrasHab:"",
-
-inventario:[],
-dano:0,
-folegoAtual:5,
-
-dinheiro:"",
-contatos:"",
-base:"",
-anotacoes:""
-})
-
-localStorage.setItem("jogadores",JSON.stringify(jogadores))
-carregar()
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
 }
 
-function abrirFicha(i){
-localStorage.setItem("jogadorAtual",i)
-window.location.href="ficha.html"
+body{
+font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+background:radial-gradient(circle at top,var(--primary) 0%, var(--bg) 60%);
+color:var(--text);
+padding:28px;
+max-width:900px;
+margin:auto;
 }
 
-/* ================= FICHA ================= */
-
-if(window.location.pathname.includes("ficha.html")){
-
-const jogadores = JSON.parse(localStorage.getItem("jogadores") || "[]")
-const atual = Number(localStorage.getItem("jogadorAtual"))
-const j = jogadores[atual]
-
-if(j){
-
-// defaults
-j.pericias ||= []
-j.inventario ||= []
-j.dano ||= 0
-j.folegoAtual ||= 5
-
-/* ====== LOAD ====== */
-
-nome.value = j.nome || ""
-idade.value = j.idade || ""
-genero.value = j.genero || ""
-especializacao.value = j.especializacao || ""
-descricao.value = j.descricao || ""
-
-fisico.value = j.fisico || 0
-mental.value = j.mental || 0
-personalidade.value = j.personalidade || 0
-
-habEspecial.value = j.habEspecial || ""
-outrasHab.value = j.outrasHab || ""
-
-dinheiro.value = j.dinheiro || ""
-contatos.value = j.contatos || ""
-base.value = j.base || ""
-anotacoes.value = j.anotacoes || ""
-
-/* ===== PERÍCIAS ===== */
-
-document.querySelectorAll(".pericia").forEach(p=>{
-p.checked = j.pericias.includes(p.value)
-})
-
-/* ===== FOTO ===== */
-
-function carregarFoto(){
-const img = document.getElementById("fotoJogador")
-if(j.foto){
-img.src = j.foto
-}else{
-img.style.display="none"
-}
+h1{
+text-align:center;
+font-weight:700;
+font-size:28px;
+margin-bottom:16px;
 }
 
-/* ===== SALVAR ===== */
-
-function salvar(){
-localStorage.setItem("jogadores", JSON.stringify(jogadores))
+h3{
+margin-bottom:14px;
+font-size:18px;
+font-weight:600;
 }
 
-/* ===== ATUALIZAR ===== */
-
-function atualizar(){
-
-j.nome = nome.value
-j.idade = idade.value
-j.genero = genero.value
-j.especializacao = especializacao.value
-j.descricao = descricao.value
-
-j.fisico = Number(fisico.value) || 0
-j.mental = Number(mental.value) || 0
-j.personalidade = Number(personalidade.value) || 0
-
-j.habEspecial = habEspecial.value
-j.outrasHab = outrasHab.value
-
-j.dinheiro = dinheiro.value
-j.contatos = contatos.value
-j.base = base.value
-j.anotacoes = anotacoes.value
-
-/* PERÍCIAS */
-j.pericias = []
-document.querySelectorAll(".pericia:checked").forEach(p=>{
-j.pericias.push(p.value)
-})
-
-/* STATUS */
-const limite = 6 + j.fisico
-const folegoMax = 5 + j.fisico
-const slotsMax = 5 + j.fisico
-
-if(j.dano > limite) j.dano = limite
-if(j.folegoAtual > folegoMax) j.folegoAtual = folegoMax
-
-document.getElementById("limite").innerText = limite
-document.getElementById("danoAtual").innerText = j.dano
-
-document.getElementById("folegoTxt").innerText =
-j.folegoAtual + " / " + folegoMax
-
-document.getElementById("folegoBar").style.width =
-(j.folegoAtual/folegoMax*100)+"%"
-
-document.getElementById("slotsTotal").innerText = slotsMax
-
-renderInventario()
-
-salvar()
+h4{
+margin-top:12px;
+margin-bottom:6px;
+color:var(--muted);
+font-size:14px;
 }
 
-/* ===== CONTROLES ===== */
-
-window.voltar = ()=> window.location.href="index.html"
-
-window.excluirFicha = ()=>{
-if(confirm("Excluir personagem?")){
-jogadores.splice(atual,1)
-salvar()
-window.location.href="index.html"
-}
+.subtitle{
+text-align:center;
+color:var(--muted);
+font-size:14px;
+margin-bottom:24px;
 }
 
-window.alterarFoto = ()=>{
-const url = prompt("Nova URL:")
-if(!url) return
-j.foto = url
-salvar()
-carregarFoto()
+#lista{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+gap:20px;
 }
 
-/* ===== DANO ===== */
-
-window.addDano = v=>{
-const limite = 6 + j.fisico
-j.dano += v
-if(j.dano > limite) j.dano = limite
-atualizar()
+.card{
+background:linear-gradient(145deg,var(--card),#24162d);
+border-radius:20px;
+padding:18px;
+text-align:center;
+border:1px solid var(--border);
+box-shadow:
+0 10px 30px rgba(0,0,0,.5),
+inset 0 0 0 1px rgba(255,255,255,.03);
+transition:.25s;
 }
 
-window.zerarDano = ()=>{
-j.dano=0
-atualizar()
+.card:hover{
+transform:translateY(-6px);
+box-shadow:
+0 20px 40px rgba(0,0,0,.7),
+0 0 0 1px var(--accent);
 }
 
-/* ===== FÔLEGO ===== */
-
-window.gastarFolego = v=>{
-j.folegoAtual -= v
-if(j.folegoAtual < 0) j.folegoAtual = 0
-atualizar()
+.foto-container{
+width:100px;
+height:100px;
+margin:0 auto 16px auto;
+border-radius:50%;
+overflow:hidden;
+background:#141225;
+border:3px solid var(--primary);
 }
 
-window.recuperarFolego = ()=>{
-const max = 5 + j.fisico
-j.folegoAtual += 2
-if(j.folegoAtual > max) j.folegoAtual = max
-atualizar()
+.foto{
+width:100%;
+height:100%;
+object-fit:cover;
 }
 
-/* ===== INVENTÁRIO ===== */
-
-window.addItem = ()=>{
-const nomeItem = itemNome.value
-const peso = Number(document.getElementById("peso").value)
-
-if(!nomeItem) return
-
-const limite = 5 + j.fisico
-
-let total = 0
-j.inventario.forEach(i=> total+=i.peso)
-
-if(total + peso > limite){
-alert("Limite excedido")
-return
+.foto-placeholder{
+display:flex;
+align-items:center;
+justify-content:center;
+height:100%;
+font-size:28px;
 }
 
-j.inventario.push({nome:nomeItem,peso})
-itemNome.value=""
-atualizar()
+button{
+background:linear-gradient(135deg,var(--primary),var(--accent));
+color:white;
+border:none;
+padding:10px 14px;
+border-radius:12px;
+cursor:pointer;
+font-size:14px;
+font-weight:600;
+transition:.2s;
+box-shadow:0 4px 12px rgba(0,0,0,.4);
+margin-top:8px;
 }
 
-function renderInventario(){
-
-const ul = document.getElementById("inventario")
-ul.innerHTML=""
-
-let total=0
-
-j.inventario.forEach((item,i)=>{
-total += item.peso
-
-ul.innerHTML += `
-<li>${item.nome} (${item.peso})
-<button onclick="removerItem(${i})">X</button>
-</li>`
-})
-
-document.getElementById("slotsUsados").innerText = total
+button:hover{
+transform:translateY(-2px);
+box-shadow:0 8px 18px rgba(0,0,0,.6);
 }
 
-window.removerItem = i=>{
-j.inventario.splice(i,1)
-atualizar()
+button:active{
+transform:scale(.96);
 }
 
-/* ===== LISTENERS ===== */
-
-document.querySelectorAll("input, textarea, select").forEach(e=>{
-e.addEventListener("input", atualizar)
-})
-
-document.querySelectorAll(".pericia").forEach(e=>{
-e.addEventListener("change", atualizar)
-})
-
-/* INIT */
-carregarFoto()
-atualizar()
-
+.top-bar{
+display:flex;
+gap:10px;
+margin-bottom:20px;
 }
+
+.top-bar button{
+flex:1;
+margin-top:0;
+}
+
+/* SECTIONS */
+
+.section{
+background:linear-gradient(145deg,var(--card),#24162d);
+border-radius:18px;
+padding:22px;
+margin-top:22px;
+border:1px solid var(--border);
+box-shadow:0 6px 18px rgba(0,0,0,.45);
+}
+
+/* INPUTS */
+
+input,select,textarea{
+width:100%;
+padding:12px;
+margin-top:6px;
+margin-bottom:14px;
+border-radius:12px;
+border:1px solid transparent;
+background:#141225;
+color:white;
+font-size:14px;
+transition:.2s;
+}
+
+textarea{
+min-height:90px;
+resize:vertical;
+}
+
+input:focus,select:focus,textarea:focus{
+outline:none;
+border-color:var(--accent);
+box-shadow:0 0 0 2px rgba(168,85,247,.3);
+}
+
+/* ATRIBUTOS */
+
+.atributos-grid{
+display:grid;
+grid-template-columns:repeat(3, 1fr);
+gap:16px;
+margin-top:12px;
+}
+
+.atributo-box{
+background:linear-gradient(145deg,var(--card),#24162d);
+border-radius:16px;
+padding:14px;
+text-align:center;
+border:1px solid var(--border);
+transition:.2s;
+}
+
+.atributo-box:hover{
+transform:translateY(-2px);
+}
+
+.atributo-box span{
+display:block;
+font-size:11px;
+color:var(--muted);
+margin-bottom:6px;
+letter-spacing:1px;
+}
+
+.atributo-box input{
+text-align:center;
+font-size:18px;
+font-weight:700;
+}
+
+/* BARRA */
+
+.bar{
+background:#141225;
+border-radius:20px;
+overflow:hidden;
+height:18px;
+margin-top:10px;
+}
+
+.fill{
+height:100%;
+background:linear-gradient(90deg,var(--primary),var(--accent));
+transition:.4s;
+}
+
+/* INVENTÁRIO */
+
+ul{
+margin-top:10px;
+}
+
+li{
+background:#141225;
+padding:10px;
+border-radius:10px;
+margin-bottom:6px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+font-size:13px;
+}
+
+li:hover{
+background:#1b1830;
+}
+
+/* ===== PERÍCIAS (NOVO) ===== */
+
+.pericia-titulo{
+margin-top:18px;
+margin-bottom:6px;
+color:var(--muted);
+font-size:14px;
+}
+
+.pericia-item{
+display:flex;
+align-items:center;
+justify-content:space-between;
+background:#141225;
+padding:10px 14px;
+border-radius:10px;
+margin-bottom:8px;
+cursor:pointer;
+transition:.2s;
+user-select:none;
+}
+
+.pericia-item:hover{
+background:#1b1830;
+transform:translateX(3px);
+}
+
+/* CHECKBOX CUSTOM */
+
+.pericia-item input{
+appearance:none;
+width:20px;
+height:20px;
+border:2px solid var(--accent);
+border-radius:6px;
+background:#141225;
+cursor:pointer;
+position:relative;
+transition:.2s;
+}
+
+.pericia-item input:checked{
+background:var(--accent);
+}
+
+.pericia-item input:checked::after{
+content:"✔";
+color:white;
+font-size:12px;
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%, -50%);
+}
+
+/* TEXTO SELECIONADO */
+
+.pericia-item input:checked + span{
+color:var(--accent);
+font-weight:600;
+}
+
+.pericia-item span{
+flex:1;
+}
+
+.pericia-item{
+display:flex;
+align-items:center;
+gap:10px; /* espaço entre checkbox e texto */
+background:#141225;
+padding:12px 14px;
+border-radius:12px;
+margin-bottom:10px;
+cursor:pointer;
+transition:.2s;
+}
+
+.pericia-item:hover{
+background:#1b1830;
+}
+
+.pericia-item input{
+width:18px;
+height:18px;
+cursor:pointer;
+margin:0; /* remove qualquer margem bugada */
+flex-shrink:0; /* evita deformar */
+}
+
+.pericia-item span{
+font-size:14px;
+line-height:1;
+}
+
+/* RESPONSIVO */
+
+@media (max-width:600px){
+
+body{
+padding:18px;
+}
+
+h1{
+font-size:22px;
+}
+
+.section{
+padding:18px;
+}
+
+.atributos-grid{
+grid-template-columns:1fr;
+}
+
+.top-bar{
+flex-direction:column;
+}
+
 }
