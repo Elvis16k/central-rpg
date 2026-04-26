@@ -1,90 +1,219 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta charset="UTF-8">
-<title>Ficha</title>
-<link rel="stylesheet" href="style.css">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>Ficha</title>
+    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
 <body>
+    <h1>Ficha</h1>
 
-<h1>Ficha</h1>
+    <div class="top-bar">
+        <button onclick="voltar()">← Voltar</button>
+        <button onclick="excluirFicha()" style="background:#dc2626;">Excluir</button>
+    </div>
 
-<div class="top-bar">
-<button onclick="voltar()">← Voltar</button>
-<button onclick="excluirFicha()" style="background:#dc2626;">Excluir</button>
-</div>
+    <div class="foto-container">
+        <img id="fotoJogador" class="foto">
+    </div>
 
-<div class="foto-container">
-<img id="fotoJogador" class="foto">
-</div>
+    <button onclick="alterarFoto()">Alterar Foto</button>
 
-<button onclick="alterarFoto()">Alterar Foto</button>
+    <div class="section">
+        <h3>Informações Gerais</h3>
 
-<div class="section">
-Nome: <input id="nome"><br><br>
-</div>
+        <input id="nome" placeholder="Nome">
+        <input id="idade" placeholder="Idade">
+        <input id="genero" placeholder="Gênero">
+        <input id="especializacao" placeholder="Especialização">
+        <textarea id="descricao" placeholder="Descrição"></textarea>
 
-<div class="atributos-grid">
+    </div>
 
-<div class="atributo-box">
-<span>FÍSICO</span>
-<input id="fisico" type="number">
-</div>
+    <div class="atributos-grid">
 
-<div class="atributo-box">
-<span>MENTAL</span>
-<input id="mental" type="number">
-</div>
+        <div class="atributo-box">
+            <span>FÍSICO</span>
+            <input id="fisico" type="number">
+        </div>
 
-<div class="atributo-box">
-<span>PERSONALIDADE</span>
-<input id="personalidade" type="number">
-</div>
+        <div class="atributo-box">
+            <span>MENTAL</span>
+            <input id="mental" type="number">
+        </div>
 
-</div>
+        <div class="atributo-box">
+            <span>PERSONALIDADE</span>
+            <input id="personalidade" type="number">
+        </div>
+
+    </div>
+
+    <div class="section">
+        <h3>Perícias</h3>
+
+        <strong class="pericia-titulo">Físico</strong>
+
+        <label class="pericia-item">
+            <input type="checkbox" class="pericia" data-tipo="fisico" value="Atletismo">
+            <span>Atletismo</span>
+        </label>
+
+        <label class="pericia-item">
+            <input type="checkbox" class="pericia" data-tipo="fisico" value="Luta">
+            <span>Luta</span>
+        </label>
+
+        <label class="pericia-item">
+            <input type="checkbox" class="pericia" data-tipo="fisico" value="Pontaria">
+            <span>Pontaria</span>
+        </label>
+
+        <label class="pericia-item">
+            <input type="checkbox" class="pericia" data-tipo="fisico" value="Furtividade">
+            <span>Furtividade</span>
+        </label>
+
+        <label class="pericia-item">
+            <input type="checkbox" class="pericia" data-tipo="fisico" value="Acrobacia">
+            <span>Acrobacia</span>
+        </label>
 
 
-<div class="section">
-<h3>Dano</h3>
-Carga atual: <span id="danoAtual">0</span> / <span id="limite"></span><br>
-<button onclick="addDano(1)">Leve</button>
-<button onclick="addDano(2)">Moderado</button>
-<button onclick="addDano(3)">Grave</button>
-<button onclick="zerarDano()">Curar</button>
-</div>
+        <strong class="pericia-titulo">Mental</strong>
 
-<div class="section">
-<h3>Fôlego</h3>
-<span id="folegoTxt"></span>
-<div class="bar">
-<div class="fill" id="folegoBar"></div>
-</div>
-<button onclick="gastarFolego(1)">-1</button>
-<button onclick="gastarFolego(2)">-2</button>
-<button onclick="recuperarFolego()">Recuperar</button>
-</div>
+        <label class="pericia-item">
+            <input type="checkbox" class="pericia" data-tipo="mental" value="Medicina">
+            <span>Medicina</span>
+        </label>
 
-<div class="section">
-<h3>Inventário</h3>
+        <label class="pericia-item">
+            <input type="checkbox" class="pericia" data-tipo="mental" value="Investigação">
+            <span>Investigação</span>
+        </label>
 
-<select id="peso">
-<option value="1">Leve</option>
-<option value="2">Comum</option>
-<option value="3">Pesado</option>
-<option value="4">Muito Pesado</option>
-</select>
+        <label class="pericia-item">
+            <input type="checkbox" class="pericia" data-tipo="mental" value="Tecnologia">
+            <span>Tecnologia</span>
+        </label>
 
-<input id="itemNome" placeholder="Item">
-<button onclick="addItem()">Adicionar</button>
+        <label class="pericia-item">
+            <input type="checkbox" class="pericia" data-tipo="mental" value="Mecânica">
+            <span>Mecânica</span>
+        </label>
 
-<ul id="inventario"></ul>
+        <label class="pericia-item">
+            <input type="checkbox" class="pericia" data-tipo="mental" value="Sobrevivência">
+            <span>Sobrevivência</span>
+        </label>
 
-Slots: <span id="slotsUsados"></span> / <span id="slotsTotal"></span>
-</div>
+        <label class="pericia-item">
+            <input type="checkbox" class="pericia" data-tipo="mental" value="Percepção">
+            <span>Percepção</span>
+        </label>
 
-<script src="script.js"></script>
 
+        <strong class="pericia-titulo">Personalidade</strong>
+
+        <label class="pericia-item">
+            <input type="checkbox" class="pericia" data-tipo="personalidade" value="Persuasão">
+            <span>Persuasão</span>
+        </label>
+
+        <label class="pericia-item">
+            <input type="checkbox" class="pericia" data-tipo="personalidade" value="Enganação">
+            <span>Enganação</span>
+        </label>
+
+        <label class="pericia-item">
+            <input type="checkbox" class="pericia" data-tipo="personalidade" value="Intimidação">
+            <span>Intimidação</span>
+        </label>
+
+        <label class="pericia-item">
+            <input type="checkbox" class="pericia" data-tipo="personalidade" value="Intuição">
+            <span>Intuição</span>
+        </label>
+
+        <label class="pericia-item">
+            <input type="checkbox" class="pericia" data-tipo="personalidade" value="Vontade">
+            <span>Vontade</span>
+        </label>
+    </div>
+
+    <div class="section">
+        <h3>Habilidades</h3>
+
+        <input id="habEspecial" placeholder="Habilidade de Especialização">
+        <textarea id="outrasHab" placeholder="Outras habilidades"></textarea>
+
+    </div>
+
+    <div class="section">
+        <h3>Condição</h3>
+
+        Dano: <span id="danoAtual">0</span> / <span id="limite"></span>
+
+        <button onclick="addDano(1)">Leve</button>
+        <button onclick="addDano(2)">Moderado</button>
+        <button onclick="addDano(3)">Grave</button>
+        <button onclick="zerarDano()">Curar</button>
+
+    </div>
+
+    <div class="section">
+        <h3>Fôlego</h3>
+
+        <span id="folegoTxt"></span>
+
+        <div class="bar">
+            <div class="fill" id="folegoBar"></div>
+        </div>
+
+        <button onclick="gastarFolego(1)">-1</button>
+        <button onclick="recuperarFolego()">Recuperar</button>
+
+    </div>
+
+    <div class="section">
+        <h3>Inventário</h3>
+
+        <select id="peso">
+            <option value="1">Leve</option>
+            <option value="2">Comum</option>
+            <option value="3">Pesado</option>
+        </select>
+
+        <input id="itemNome" placeholder="Item">
+        <button onclick="addItem()">Adicionar</button>
+
+        <ul id="inventario"></ul>
+
+        Slots: <span id="slotsUsados"></span> / <span id="slotsTotal"></span>
+
+    </div>
+
+    <div class="section">
+        <h3>Recursos</h3>
+
+        <input id="dinheiro" placeholder="Dinheiro">
+        <input id="contatos" placeholder="Contatos">
+        <input id="base" placeholder="Base / Abrigo">
+
+    </div>
+
+    <div class="section">
+        <h3>Anotações</h3>
+
+        <textarea id="anotacoes"></textarea>
+
+
+    </div>
+
+    <script src="script.js"></script>
 </body>
+
 </html>
