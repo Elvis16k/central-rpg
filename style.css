@@ -1,262 +1,296 @@
-:root{
---bg:#1E1C2F;
---card:#2D1E36;
---primary:#3E0866;
---primary-light:#501A5E;
---accent:#a855f7;
---text:#e5e7eb;
---muted:#a78bfa;
---border:rgba(255,255,255,0.06);
+function carregar(){
+
+const jogadores = JSON.parse(localStorage.getItem("jogadores") || "[]")
+const lista = document.getElementById("lista")
+if(!lista) return
+
+lista.innerHTML=""
+
+jogadores.forEach((j,i)=>{
+const div=document.createElement("div")
+div.className="card"
+
+div.innerHTML=`
+<div class="foto-container">
+${j.foto 
+? `<img src="${j.foto}" class="foto">`
+: `<div class="foto-placeholder">👤</div>`}
+</div>
+
+<strong>${j.nome}</strong>
+<br><br>
+<button onclick="abrirFicha(${i})">Abrir</button>
+`
+lista.appendChild(div)
+})
 }
 
-*{
-box-sizing:border-box;
-margin:0;
-padding:0;
+function novoJogador(){
+
+const nome=prompt("Nome do jogador:")
+if(!nome) return
+
+const foto=prompt("URL da foto (opcional):")
+
+const jogadores=JSON.parse(localStorage.getItem("jogadores")||"[]")
+
+jogadores.push({
+nome,
+foto:foto||"",
+
+idade:"",
+genero:"",
+especializacao:"",
+descricao:"",
+
+fisico:0,
+mental:0,
+personalidade:0,
+
+pericias:[],
+
+habEspecial:"",
+outrasHab:"",
+
+inventario:[],
+dano:0,
+folegoAtual:5,
+
+dinheiro:"",
+contatos:"",
+base:"",
+anotacoes:""
+})
+
+localStorage.setItem("jogadores",JSON.stringify(jogadores))
+carregar()
 }
 
-body{
-font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-background:radial-gradient(circle at top,var(--primary) 0%, var(--bg) 60%);
-color:var(--text);
-padding:24px;
+function abrirFicha(i){
+localStorage.setItem("jogadorAtual",i)
+window.location.href="ficha.html"
 }
 
-h1{
-text-align:center;
-font-weight:700;
-font-size:26px;
-margin-bottom:12px;
+/* ================= FICHA ================= */
+
+if(window.location.pathname.includes("ficha.html")){
+
+const jogadores = JSON.parse(localStorage.getItem("jogadores") || "[]")
+const atual = Number(localStorage.getItem("jogadorAtual"))
+const j = jogadores[atual]
+
+if(j){
+
+// defaults
+j.pericias ||= []
+j.inventario ||= []
+j.dano ||= 0
+j.folegoAtual ||= 5
+
+/* ====== LOAD ====== */
+
+nome.value = j.nome || ""
+idade.value = j.idade || ""
+genero.value = j.genero || ""
+especializacao.value = j.especializacao || ""
+descricao.value = j.descricao || ""
+
+fisico.value = j.fisico || 0
+mental.value = j.mental || 0
+personalidade.value = j.personalidade || 0
+
+habEspecial.value = j.habEspecial || ""
+outrasHab.value = j.outrasHab || ""
+
+dinheiro.value = j.dinheiro || ""
+contatos.value = j.contatos || ""
+base.value = j.base || ""
+anotacoes.value = j.anotacoes || ""
+
+/* ===== PERÍCIAS ===== */
+
+document.querySelectorAll(".pericia").forEach(p=>{
+p.checked = j.pericias.includes(p.value)
+})
+
+/* ===== FOTO ===== */
+
+function carregarFoto(){
+const img = document.getElementById("fotoJogador")
+if(j.foto){
+img.src = j.foto
+}else{
+img.style.display="none"
+}
 }
 
-.subtitle{
-text-align:center;
-color:var(--muted);
-font-size:14px;
-margin-bottom:24px;
+/* ===== SALVAR ===== */
+
+function salvar(){
+localStorage.setItem("jogadores", JSON.stringify(jogadores))
 }
 
-#lista{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-gap:18px;
+/* ===== ATUALIZAR ===== */
+
+function atualizar(){
+
+j.nome = nome.value
+j.idade = idade.value
+j.genero = genero.value
+j.especializacao = especializacao.value
+j.descricao = descricao.value
+
+j.fisico = Number(fisico.value) || 0
+j.mental = Number(mental.value) || 0
+j.personalidade = Number(personalidade.value) || 0
+
+j.habEspecial = habEspecial.value
+j.outrasHab = outrasHab.value
+
+j.dinheiro = dinheiro.value
+j.contatos = contatos.value
+j.base = base.value
+j.anotacoes = anotacoes.value
+
+/* PERÍCIAS */
+j.pericias = []
+document.querySelectorAll(".pericia:checked").forEach(p=>{
+j.pericias.push(p.value)
+})
+
+/* STATUS */
+const limite = 6 + j.fisico
+const folegoMax = 5 + j.fisico
+const slotsMax = 5 + j.fisico
+
+if(j.dano > limite) j.dano = limite
+if(j.folegoAtual > folegoMax) j.folegoAtual = folegoMax
+
+document.getElementById("limite").innerText = limite
+document.getElementById("danoAtual").innerText = j.dano
+
+document.getElementById("folegoTxt").innerText =
+j.folegoAtual + " / " + folegoMax
+
+document.getElementById("folegoBar").style.width =
+(j.folegoAtual/folegoMax*100)+"%"
+
+document.getElementById("slotsTotal").innerText = slotsMax
+
+renderInventario()
+
+salvar()
 }
 
-.card{
-background:linear-gradient(145deg,var(--card),#24162d);
-border-radius:20px;
-padding:20px;
-text-align:center;
-border:1px solid var(--border);
-box-shadow:
-0 10px 30px rgba(0,0,0,.5),
-inset 0 0 0 1px rgba(255,255,255,.03);
-transition:.25s;
-position:relative;
-overflow:hidden;
+/* ===== CONTROLES ===== */
+
+window.voltar = ()=> window.location.href="index.html"
+
+window.excluirFicha = ()=>{
+if(confirm("Excluir personagem?")){
+jogadores.splice(atual,1)
+salvar()
+window.location.href="index.html"
+}
 }
 
-.card:hover{
-transform:translateY(-6px) scale(1.01);
-box-shadow:
-0 20px 40px rgba(0,0,0,.7),
-0 0 0 1px var(--accent);
+window.alterarFoto = ()=>{
+const url = prompt("Nova URL:")
+if(!url) return
+j.foto = url
+salvar()
+carregarFoto()
 }
 
-.foto-container{
-width:100px;
-height:100px;
-margin:10px auto 18px auto;
-border-radius:50%;
-overflow:hidden;
-background:#141225;
-border:3px solid var(--primary);
-box-shadow:0 0 15px rgba(0,0,0,.6);
+/* ===== DANO ===== */
+
+window.addDano = v=>{
+const limite = 6 + j.fisico
+j.dano += v
+if(j.dano > limite) j.dano = limite
+atualizar()
 }
 
-.foto{
-width:100%;
-height:100%;
-object-fit:cover;
+window.zerarDano = ()=>{
+j.dano=0
+atualizar()
 }
 
-.foto-placeholder{
-display:flex;
-align-items:center;
-justify-content:center;
-height:100%;
-font-size:28px;
+/* ===== FÔLEGO ===== */
+
+window.gastarFolego = v=>{
+j.folegoAtual -= v
+if(j.folegoAtual < 0) j.folegoAtual = 0
+atualizar()
 }
 
-button{
-background:linear-gradient(135deg,var(--primary),var(--accent));
-color:white;
-border:none;
-padding:12px;
-border-radius:14px;
-cursor:pointer;
-font-size:15px;
-font-weight:600;
-transition:.2s;
-width:100%;
-box-shadow:0 6px 16px rgba(0,0,0,.4);
-margin-top:10px;
+window.recuperarFolego = ()=>{
+const max = 5 + j.fisico
+j.folegoAtual += 2
+if(j.folegoAtual > max) j.folegoAtual = max
+atualizar()
 }
 
-button:hover{
-transform:translateY(-2px);
-box-shadow:0 10px 22px rgba(0,0,0,.6);
+/* ===== INVENTÁRIO ===== */
+
+window.addItem = ()=>{
+const nomeItem = itemNome.value
+const peso = Number(document.getElementById("peso").value)
+
+if(!nomeItem) return
+
+const limite = 5 + j.fisico
+
+let total = 0
+j.inventario.forEach(i=> total+=i.peso)
+
+if(total + peso > limite){
+alert("Limite excedido")
+return
 }
 
-button:active{
-transform:scale(.97);
+j.inventario.push({nome:nomeItem,peso})
+itemNome.value=""
+atualizar()
 }
 
-.section{
-background:linear-gradient(145deg,var(--card),#24162d);
-border-radius:18px;
-padding:20px;
-margin-top:24px;
-border:1px solid var(--border);
-box-shadow:0 6px 18px rgba(0,0,0,.45);
+function renderInventario(){
+
+const ul = document.getElementById("inventario")
+ul.innerHTML=""
+
+let total=0
+
+j.inventario.forEach((item,i)=>{
+total += item.peso
+
+ul.innerHTML += `
+<li>${item.nome} (${item.peso})
+<button onclick="removerItem(${i})">X</button>
+</li>`
+})
+
+document.getElementById("slotsUsados").innerText = total
 }
 
-input,select{
-width:100%;
-padding:14px;
-margin-top:8px;
-margin-bottom:16px;
-border-radius:12px;
-border:1px solid transparent;
-background:#141225;
-color:white;
-font-size:15px;
-transition:.2s;
+window.removerItem = i=>{
+j.inventario.splice(i,1)
+atualizar()
 }
 
-input:focus,select:focus{
-outline:none;
-border-color:var(--accent);
-box-shadow:0 0 0 2px rgba(168,85,247,.3);
-}
+/* ===== LISTENERS ===== */
 
-.bar{
-background:#141225;
-border-radius:20px;
-overflow:hidden;
-height:20px;
-}
+document.querySelectorAll("input, textarea, select").forEach(e=>{
+e.addEventListener("input", atualizar)
+})
 
-.fill{
-height:100%;
-background:linear-gradient(90deg,var(--primary),var(--accent));
-transition:.4s cubic-bezier(.4,0,.2,1);
-}
+document.querySelectorAll(".pericia").forEach(e=>{
+e.addEventListener("change", atualizar)
+})
 
-li{
-background:#141225;
-padding:10px 12px;
-border-radius:12px;
-margin-bottom:8px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-font-size:14px;
-transition:.2s;
-}
-
-li:hover{
-background:#1b1830;
-transform:translateX(3px);
-}
-
-strong{
-display:block;
-font-size:18px;
-margin-bottom:6px;
-}
-
-.atributos-grid{
-display:grid;
-grid-template-columns:repeat(3, 1fr);
-gap:18px;
-margin-top:16px;
-margin-bottom:8px;
-}
-
-.atributo-box{
-background:linear-gradient(145deg,var(--card),#24162d);
-border-radius:16px;
-padding:16px;
-text-align:center;
-border:1px solid var(--border);
-box-shadow:0 4px 14px rgba(0,0,0,.4);
-transition:.2s;
-}
-
-.atributo-box:hover{
-transform:translateY(-3px);
-box-shadow:0 8px 20px rgba(0,0,0,.6);
-}
-
-.atributo-box span{
-display:block;
-font-size:12px;
-color:var(--muted);
-margin-bottom:6px;
-letter-spacing:1px;
-}
-
-.atributo-box input{
-width:100%;
-text-align:center;
-font-size:20px;
-font-weight:700;
-background:#141225;
-border-radius:10px;
-border:none;
-color:white;
-padding:10px;
-}
-
-@media (max-width:600px){
-
-body{
-padding:16px;
-}
-
-h1{
-font-size:22px;
-}
-
-.card{
-padding:16px;
-}
-
-.section{
-padding:16px;
-margin-top:18px;
-}
-
-button{
-padding:14px;
-font-size:16px;
-}
-
-.atributos-grid{
-grid-template-columns:1fr;
-gap:14px;
-}
+/* INIT */
+carregarFoto()
+atualizar()
 
 }
-
-.top-bar{
-display:flex;
-gap:12px;
-margin:12px 0 20px 0;
-}
-
-.top-bar button{
-flex:1;
-margin-top:0;
 }
