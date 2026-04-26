@@ -1,4 +1,5 @@
 function carregar(){
+
 const jogadores = JSON.parse(localStorage.getItem("jogadores") || "[]")
 const lista = document.getElementById("lista")
 if(!lista) return
@@ -25,6 +26,7 @@ lista.appendChild(div)
 }
 
 function novoJogador(){
+
 const nome=prompt("Nome do jogador:")
 if(!nome) return
 
@@ -35,12 +37,29 @@ const jogadores=JSON.parse(localStorage.getItem("jogadores")||"[]")
 jogadores.push({
 nome,
 foto:foto||"",
+
+idade:"",
+genero:"",
+especializacao:"",
+descricao:"",
+
 fisico:0,
 mental:0,
 personalidade:0,
+
+pericias:[],
+
+habEspecial:"",
+outrasHab:"",
+
 inventario:[],
 dano:0,
-folegoAtual:5
+folegoAtual:5,
+
+dinheiro:"",
+contatos:"",
+base:"",
+anotacoes:""
 })
 
 localStorage.setItem("jogadores",JSON.stringify(jogadores))
@@ -52,80 +71,94 @@ localStorage.setItem("jogadorAtual",i)
 window.location.href="ficha.html"
 }
 
-// BOTÕES GLOBAIS (CORREÇÃO PRINCIPAL)
-window.voltar = ()=>{
-window.location.href = "index.html"
-}
+/* ================= FICHA ================= */
 
-window.excluirFicha = ()=>{
-const jogadores = JSON.parse(localStorage.getItem("jogadores") || "[]")
-const atual = Number(localStorage.getItem("jogadorAtual"))
-
-if(isNaN(atual) || !jogadores[atual]){
-alert("Ficha inválida.")
-return
-}
-
-const confirmar = confirm("Tem certeza que deseja excluir essa ficha?")
-if(!confirmar) return
-
-jogadores.splice(atual,1)
-localStorage.setItem("jogadores", JSON.stringify(jogadores))
-
-window.location.href = "index.html"
-}
-
-// DETECTA PÁGINA DA FICHA (MAIS SEGURO)
-if(window.location.href.includes("ficha.html")){
+if(window.location.pathname.includes("ficha.html")){
 
 const jogadores = JSON.parse(localStorage.getItem("jogadores") || "[]")
 const atual = Number(localStorage.getItem("jogadorAtual"))
 const j = jogadores[atual]
 
-// PROTEÇÃO
-if(isNaN(atual) || !j){
-window.location.href = "index.html"
-}
-
 if(j){
 
-if(!j.inventario) j.inventario=[]
-if(!j.dano) j.dano=0
-if(!j.folegoAtual) j.folegoAtual=5
+// defaults
+j.pericias ||= []
+j.inventario ||= []
+j.dano ||= 0
+j.folegoAtual ||= 5
 
-nome.value = j.nome
-fisico.value = j.fisico
-mental.value = j.mental
-personalidade.value = j.personalidade
+/* ====== LOAD ====== */
 
-function salvar(){
-localStorage.setItem("jogadores", JSON.stringify(jogadores))
-}
+nome.value = j.nome || ""
+idade.value = j.idade || ""
+genero.value = j.genero || ""
+especializacao.value = j.especializacao || ""
+descricao.value = j.descricao || ""
+
+fisico.value = j.fisico || 0
+mental.value = j.mental || 0
+personalidade.value = j.personalidade || 0
+
+habEspecial.value = j.habEspecial || ""
+outrasHab.value = j.outrasHab || ""
+
+dinheiro.value = j.dinheiro || ""
+contatos.value = j.contatos || ""
+base.value = j.base || ""
+anotacoes.value = j.anotacoes || ""
+
+/* ===== PERÍCIAS ===== */
+
+document.querySelectorAll(".pericia").forEach(p=>{
+p.checked = j.pericias.includes(p.value)
+})
+
+/* ===== FOTO ===== */
 
 function carregarFoto(){
 const img = document.getElementById("fotoJogador")
 if(j.foto){
 img.src = j.foto
 }else{
-img.style.display = "none"
+img.style.display="none"
 }
 }
 
-window.alterarFoto = function(){
-const nova = prompt("Cole a nova URL da imagem:")
-if(!nova) return
-j.foto = nova
-salvar()
-carregarFoto()
+/* ===== SALVAR ===== */
+
+function salvar(){
+localStorage.setItem("jogadores", JSON.stringify(jogadores))
 }
+
+/* ===== ATUALIZAR ===== */
 
 function atualizar(){
 
 j.nome = nome.value
+j.idade = idade.value
+j.genero = genero.value
+j.especializacao = especializacao.value
+j.descricao = descricao.value
+
 j.fisico = Number(fisico.value) || 0
 j.mental = Number(mental.value) || 0
 j.personalidade = Number(personalidade.value) || 0
 
+j.habEspecial = habEspecial.value
+j.outrasHab = outrasHab.value
+
+j.dinheiro = dinheiro.value
+j.contatos = contatos.value
+j.base = base.value
+j.anotacoes = anotacoes.value
+
+/* PERÍCIAS */
+j.pericias = []
+document.querySelectorAll(".pericia:checked").forEach(p=>{
+j.pericias.push(p.value)
+})
+
+/* STATUS */
 const limite = 6 + j.fisico
 const folegoMax = 5 + j.fisico
 const slotsMax = 5 + j.fisico
@@ -133,20 +166,43 @@ const slotsMax = 5 + j.fisico
 if(j.dano > limite) j.dano = limite
 if(j.folegoAtual > folegoMax) j.folegoAtual = folegoMax
 
-document.getElementById("limite").textContent = limite
-document.getElementById("danoAtual").textContent = j.dano
+document.getElementById("limite").innerText = limite
+document.getElementById("danoAtual").innerText = j.dano
 
-document.getElementById("folegoTxt").textContent =
+document.getElementById("folegoTxt").innerText =
 j.folegoAtual + " / " + folegoMax
 
 document.getElementById("folegoBar").style.width =
 (j.folegoAtual/folegoMax*100)+"%"
 
-document.getElementById("slotsTotal").textContent = slotsMax
+document.getElementById("slotsTotal").innerText = slotsMax
 
 renderInventario()
+
 salvar()
 }
+
+/* ===== CONTROLES ===== */
+
+window.voltar = ()=> window.location.href="index.html"
+
+window.excluirFicha = ()=>{
+if(confirm("Excluir personagem?")){
+jogadores.splice(atual,1)
+salvar()
+window.location.href="index.html"
+}
+}
+
+window.alterarFoto = ()=>{
+const url = prompt("Nova URL:")
+if(!url) return
+j.foto = url
+salvar()
+carregarFoto()
+}
+
+/* ===== DANO ===== */
 
 window.addDano = v=>{
 const limite = 6 + j.fisico
@@ -159,6 +215,8 @@ window.zerarDano = ()=>{
 j.dano=0
 atualizar()
 }
+
+/* ===== FÔLEGO ===== */
 
 window.gastarFolego = v=>{
 j.folegoAtual -= v
@@ -173,17 +231,21 @@ if(j.folegoAtual > max) j.folegoAtual = max
 atualizar()
 }
 
+/* ===== INVENTÁRIO ===== */
+
 window.addItem = ()=>{
 const nomeItem = itemNome.value
 const peso = Number(document.getElementById("peso").value)
 
+if(!nomeItem) return
+
 const limite = 5 + j.fisico
 
-let totalAtual = 0
-j.inventario.forEach(item => totalAtual += item.peso)
+let total = 0
+j.inventario.forEach(i=> total+=i.peso)
 
-if(totalAtual + peso > limite){
-alert("Limite de carga excedido!")
+if(total + peso > limite){
+alert("Limite excedido")
 return
 }
 
@@ -193,19 +255,22 @@ atualizar()
 }
 
 function renderInventario(){
+
 const ul = document.getElementById("inventario")
 ul.innerHTML=""
+
 let total=0
 
 j.inventario.forEach((item,i)=>{
 total += item.peso
+
 ul.innerHTML += `
 <li>${item.nome} (${item.peso})
 <button onclick="removerItem(${i})">X</button>
 </li>`
 })
 
-document.getElementById("slotsUsados").textContent = total
+document.getElementById("slotsUsados").innerText = total
 }
 
 window.removerItem = i=>{
@@ -213,11 +278,19 @@ j.inventario.splice(i,1)
 atualizar()
 }
 
-document.querySelectorAll("input, select").forEach(i=>{
-i.addEventListener("input", atualizar)
+/* ===== LISTENERS ===== */
+
+document.querySelectorAll("input, textarea, select").forEach(e=>{
+e.addEventListener("input", atualizar)
 })
 
+document.querySelectorAll(".pericia").forEach(e=>{
+e.addEventListener("change", atualizar)
+})
+
+/* INIT */
 carregarFoto()
 atualizar()
+
 }
 }
