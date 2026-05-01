@@ -1,296 +1,321 @@
-function carregar(){
-
-const jogadores = JSON.parse(localStorage.getItem("jogadores") || "[]")
-const lista = document.getElementById("lista")
-if(!lista) return
-
-lista.innerHTML=""
-
-jogadores.forEach((j,i)=>{
-const div=document.createElement("div")
-div.className="card"
-
-div.innerHTML=`
-<div class="foto-container">
-${j.foto 
-? `<img src="${j.foto}" class="foto">`
-: `<div class="foto-placeholder">👤</div>`}
-</div>
-
-<strong>${j.nome}</strong>
-<br><br>
-<button onclick="abrirFicha(${i})">Abrir</button>
-`
-lista.appendChild(div)
-})
+// ============================
+// 📦 BASE DE DADOS
+// ============================
+function getJogadores(){
+    return JSON.parse(localStorage.getItem("jogadores") || "[]")
 }
 
+function setJogadores(lista){
+    localStorage.setItem("jogadores", JSON.stringify(lista))
+}
+
+// ============================
+// 📋 TELA INICIAL (INDEX)
+// ============================
+function carregar(){
+    const lista = document.getElementById("lista")
+    if(!lista) return // <- evita erro na ficha
+
+    const jogadores = getJogadores()
+
+    lista.innerHTML = ""
+
+    jogadores.forEach((j,i)=>{
+        const div = document.createElement("div")
+        div.className = "card"
+
+        div.innerHTML = `
+        <div class="foto-container">
+        ${
+            j.foto
+            ? `<img src="${j.foto}" class="foto">`
+            : `<div class="foto-placeholder">👤</div>`
+        }
+        </div>
+
+        <strong>${j.nome}</strong>
+
+        <button onclick="abrirFicha(${i})">Abrir</button>
+        `
+
+        lista.appendChild(div)
+    })
+}
+
+// ============================
+// ➕ NOVO JOGADOR (CORRIGIDO)
+// ============================
 function novoJogador(){
 
-const nome=prompt("Nome do jogador:")
-if(!nome) return
+    const nome = prompt("Nome do jogador:")
+    if(!nome) return
 
-const foto=prompt("URL da foto (opcional):")
+    const foto = prompt("URL da foto (opcional):")
 
-const jogadores=JSON.parse(localStorage.getItem("jogadores")||"[]")
+    const jogadores = getJogadores()
 
-jogadores.push({
-nome,
-foto:foto||"",
+    jogadores.push({
+        nome,
+        foto: foto || "",
+        idade:"",
+        genero:"",
+        especializacao:"",
+        descricao:"",
 
-idade:"",
-genero:"",
-especializacao:"",
-descricao:"",
+        fisico:1,
+        mental:1,
+        personalidade:1,
 
-fisico:0,
-mental:0,
-personalidade:0,
+        pericias:[],
 
-pericias:[],
+        habilidades:{
+            especial:"",
+            outras:""
+        },
 
-habEspecial:"",
-outrasHab:"",
+        sincronia:0,
 
-inventario:[],
-dano:0,
-folegoAtual:5,
+        dano:{leve:0,moderado:0,grave:0},
 
-dinheiro:"",
-contatos:"",
-base:"",
-anotacoes:""
-})
+        folegoAtual:3,
 
-localStorage.setItem("jogadores",JSON.stringify(jogadores))
-carregar()
+        inventario:[],
+
+        recursos:{
+            dinheiro:"",
+            contatos:"",
+            base:""
+        },
+
+        anotacoes:""
+    })
+
+    setJogadores(jogadores)
+    carregar()
 }
 
+// ============================
+// 🔗 ABRIR FICHA
+// ============================
 function abrirFicha(i){
-localStorage.setItem("jogadorAtual",i)
-window.location.href="ficha.html"
+    localStorage.setItem("jogadorAtual", i)
+    window.location.href = "ficha.html"
 }
 
-/* ================= FICHA ================= */
-
+// ============================
+// 📄 FICHA
+// ============================
 if(window.location.pathname.includes("ficha.html")){
 
-const jogadores = JSON.parse(localStorage.getItem("jogadores") || "[]")
+const jogadores = getJogadores()
 const atual = Number(localStorage.getItem("jogadorAtual"))
 const j = jogadores[atual]
 
-if(j){
-
-// defaults
-j.pericias ||= []
-j.inventario ||= []
-j.dano ||= 0
-j.folegoAtual ||= 5
-
-/* ====== LOAD ====== */
-
-nome.value = j.nome || ""
-idade.value = j.idade || ""
-genero.value = j.genero || ""
-especializacao.value = j.especializacao || ""
-descricao.value = j.descricao || ""
-
-fisico.value = j.fisico || 0
-mental.value = j.mental || 0
-personalidade.value = j.personalidade || 0
-
-habEspecial.value = j.habEspecial || ""
-outrasHab.value = j.outrasHab || ""
-
-dinheiro.value = j.dinheiro || ""
-contatos.value = j.contatos || ""
-base.value = j.base || ""
-anotacoes.value = j.anotacoes || ""
-
-/* ===== PERÍCIAS ===== */
-
-document.querySelectorAll(".pericia").forEach(p=>{
-p.checked = j.pericias.includes(p.value)
-})
-
-/* ===== FOTO ===== */
-
-function carregarFoto(){
-const img = document.getElementById("fotoJogador")
-if(j.foto){
-img.src = j.foto
-}else{
-img.style.display="none"
-}
+if(!j){
+    alert("Ficha não encontrada")
+    window.location.href = "index.html"
 }
 
-/* ===== SALVAR ===== */
+// ===== INIT =====
+if(!j.inventario) j.inventario=[]
+if(!j.sincronia) j.sincronia=0
+if(!j.folegoAtual) j.folegoAtual=3
+if(!j.dano) j.dano={leve:0,moderado:0,grave:0}
+if(!j.pericias) j.pericias=[]
 
+// ===== SALVAR =====
 function salvar(){
-localStorage.setItem("jogadores", JSON.stringify(jogadores))
+    setJogadores(jogadores)
 }
 
-/* ===== ATUALIZAR ===== */
+// ===== FOTO =====
+function carregarFoto(){
+    const img = document.getElementById("fotoJogador")
+    if(!img) return
 
-function atualizar(){
-
-j.nome = nome.value
-j.idade = idade.value
-j.genero = genero.value
-j.especializacao = especializacao.value
-j.descricao = descricao.value
-
-j.fisico = Number(fisico.value) || 0
-j.mental = Number(mental.value) || 0
-j.personalidade = Number(personalidade.value) || 0
-
-j.habEspecial = habEspecial.value
-j.outrasHab = outrasHab.value
-
-j.dinheiro = dinheiro.value
-j.contatos = contatos.value
-j.base = base.value
-j.anotacoes = anotacoes.value
-
-/* PERÍCIAS */
-j.pericias = []
-document.querySelectorAll(".pericia:checked").forEach(p=>{
-j.pericias.push(p.value)
-})
-
-/* STATUS */
-const limite = 6 + j.fisico
-const folegoMax = 5 + j.fisico
-const slotsMax = 5 + j.fisico
-
-if(j.dano > limite) j.dano = limite
-if(j.folegoAtual > folegoMax) j.folegoAtual = folegoMax
-
-document.getElementById("limite").innerText = limite
-document.getElementById("danoAtual").innerText = j.dano
-
-document.getElementById("folegoTxt").innerText =
-j.folegoAtual + " / " + folegoMax
-
-document.getElementById("folegoBar").style.width =
-(j.folegoAtual/folegoMax*100)+"%"
-
-document.getElementById("slotsTotal").innerText = slotsMax
-
-renderInventario()
-
-salvar()
-}
-
-/* ===== CONTROLES ===== */
-
-window.voltar = ()=> window.location.href="index.html"
-
-window.excluirFicha = ()=>{
-if(confirm("Excluir personagem?")){
-jogadores.splice(atual,1)
-salvar()
-window.location.href="index.html"
-}
+    if(j.foto){
+        img.src = j.foto
+    }else{
+        img.style.display="none"
+    }
 }
 
 window.alterarFoto = ()=>{
-const url = prompt("Nova URL:")
-if(!url) return
-j.foto = url
-salvar()
-carregarFoto()
+    const nova = prompt("URL da imagem:")
+    if(!nova) return
+    j.foto = nova
+    salvar()
+    carregarFoto()
 }
 
-/* ===== DANO ===== */
+// ===== VOLTAR =====
+window.voltar = ()=> window.location.href="index.html"
 
-window.addDano = v=>{
-const limite = 6 + j.fisico
-j.dano += v
-if(j.dano > limite) j.dano = limite
-atualizar()
+window.excluirFicha = ()=>{
+    if(!confirm("Excluir ficha?")) return
+    jogadores.splice(atual,1)
+    salvar()
+    window.location.href="index.html"
+}
+
+// ===== PERÍCIAS =====
+function carregarPericias(){
+    document.querySelectorAll(".pericia").forEach(c=>{
+        c.checked = j.pericias.includes(c.value)
+
+        c.addEventListener("change", ()=>{
+            if(c.checked){
+                if(!j.pericias.includes(c.value)){
+                    j.pericias.push(c.value)
+                }
+            }else{
+                j.pericias = j.pericias.filter(p=>p!==c.value)
+            }
+            salvar()
+        })
+    })
+}
+
+// ===== SINCRONIA =====
+window.addSincronia = (v)=>{
+    j.sincronia += v
+    if(j.sincronia < 0) j.sincronia = 0
+    if(j.sincronia > 10) j.sincronia = 10
+    atualizar()
+}
+
+window.zerarSincronia = ()=>{
+    j.sincronia = 0
+    atualizar()
+}
+
+// ===== DANO =====
+window.addDano = (tipo)=>{
+
+    const peso = {leve:1,moderado:2,grave:3}
+
+    let total =
+    (j.dano.leve*1)+(j.dano.moderado*2)+(j.dano.grave*3)
+
+    const limite = j.fisico + 2
+
+    if(total + peso[tipo] > limite){
+        alert("Limite de dano atingido!")
+        return
+    }
+
+    j.dano[tipo]++
+    atualizar()
 }
 
 window.zerarDano = ()=>{
-j.dano=0
-atualizar()
+    j.dano = {leve:0,moderado:0,grave:0}
+    atualizar()
 }
 
-/* ===== FÔLEGO ===== */
-
+// ===== FÔLEGO =====
 window.gastarFolego = v=>{
-j.folegoAtual -= v
-if(j.folegoAtual < 0) j.folegoAtual = 0
-atualizar()
+    j.folegoAtual -= v
+    if(j.folegoAtual < 0) j.folegoAtual = 0
+    atualizar()
 }
 
 window.recuperarFolego = ()=>{
-const max = 5 + j.fisico
-j.folegoAtual += 2
-if(j.folegoAtual > max) j.folegoAtual = max
-atualizar()
+    const max = j.fisico + 2
+    j.folegoAtual++
+    if(j.folegoAtual > max) j.folegoAtual = max
+    atualizar()
 }
 
-/* ===== INVENTÁRIO ===== */
-
+// ===== INVENTÁRIO =====
 window.addItem = ()=>{
-const nomeItem = itemNome.value
-const peso = Number(document.getElementById("peso").value)
+    const nome = itemNome.value
+    const peso = Number(document.getElementById("peso").value)
 
-if(!nomeItem) return
+    let total = j.inventario.reduce((s,i)=>s+i.peso,0)
+    let limite = j.fisico * 2
 
-const limite = 5 + j.fisico
+    if(total + peso > limite){
+        alert("Sem espaço!")
+        return
+    }
 
-let total = 0
-j.inventario.forEach(i=> total+=i.peso)
-
-if(total + peso > limite){
-alert("Limite excedido")
-return
-}
-
-j.inventario.push({nome:nomeItem,peso})
-itemNome.value=""
-atualizar()
-}
-
-function renderInventario(){
-
-const ul = document.getElementById("inventario")
-ul.innerHTML=""
-
-let total=0
-
-j.inventario.forEach((item,i)=>{
-total += item.peso
-
-ul.innerHTML += `
-<li>${item.nome} (${item.peso})
-<button onclick="removerItem(${i})">X</button>
-</li>`
-})
-
-document.getElementById("slotsUsados").innerText = total
+    j.inventario.push({nome,peso})
+    itemNome.value=""
+    atualizar()
 }
 
 window.removerItem = i=>{
-j.inventario.splice(i,1)
-atualizar()
+    j.inventario.splice(i,1)
+    atualizar()
 }
 
-/* ===== LISTENERS ===== */
+function renderInventario(){
+    const ul = document.getElementById("inventario")
+    if(!ul) return
 
-document.querySelectorAll("input, textarea, select").forEach(e=>{
-e.addEventListener("input", atualizar)
-})
+    ul.innerHTML=""
+    let total=0
 
-document.querySelectorAll(".pericia").forEach(e=>{
-e.addEventListener("change", atualizar)
-})
+    j.inventario.forEach((item,i)=>{
+        total+=item.peso
+        ul.innerHTML+=`
+        <li>${item.nome} (${item.peso})
+        <button onclick="removerItem(${i})">X</button>
+        </li>`
+    })
 
-/* INIT */
+    document.getElementById("slotsUsados").innerText = total
+}
+
+// ===== UPDATE =====
+function atualizar(){
+
+    j.nome = nome.value
+    j.fisico = Number(fisico.value)||0
+    j.mental = Number(mental.value)||0
+    j.personalidade = Number(personalidade.value)||0
+
+    // SINCRONIA
+    sincroniaTxt.innerText = j.sincronia + " / 10"
+    sincroniaBar.style.width = (j.sincronia/10*100)+"%"
+
+    // DANO
+    const limite = j.fisico + 2
+    const total =
+    (j.dano.leve*1)+(j.dano.moderado*2)+(j.dano.grave*3)
+
+    document.getElementById("limite").innerText = limite
+    document.getElementById("danoTxt").innerText =
+    `${total} / ${limite}`
+
+    const barra = document.getElementById("danoBar")
+    barra.style.width = (total/limite*100)+"%"
+
+    // FÔLEGO
+    const maxF = j.fisico + 2
+    folegoTxt.innerText = j.folegoAtual + " / " + maxF
+    folegoBar.style.width = (j.folegoAtual/maxF*100)+"%"
+
+    // INVENTÁRIO
+    document.getElementById("slotsTotal").innerText = j.fisico*2
+    renderInventario()
+
+    salvar()
+}
+
+// ===== INIT =====
+nome.value = j.nome || ""
+fisico.value = j.fisico || 1
+mental.value = j.mental || 1
+personalidade.value = j.personalidade || 1
+
 carregarFoto()
+carregarPericias()
 atualizar()
 
-}
+document.querySelectorAll("input, textarea, select").forEach(el=>{
+    el.addEventListener("input", atualizar)
+})
+
 }
